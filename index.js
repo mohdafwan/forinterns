@@ -106,6 +106,43 @@ const restaurants = [
   }
 ];
 
+// Sample booking data
+const bookings = [
+  {
+    id: 1,
+    userName: "John Smith",
+    phoneNumber: "+1-555-1234",
+    totalPeople: 4,
+    tableBookingTime: "2025-06-02T19:00:00Z",
+    restaurantId: 1,
+    status: "confirmed",
+    specialRequests: "Window seat preferred",
+    createdAt: "2025-06-01T10:30:00Z"
+  },
+  {
+    id: 2,
+    userName: "Emily Johnson",
+    phoneNumber: "+1-555-5678",
+    totalPeople: 2,
+    tableBookingTime: "2025-06-03T20:30:00Z",
+    restaurantId: 2,
+    status: "pending",
+    specialRequests: "Anniversary dinner",
+    createdAt: "2025-06-01T14:15:00Z"
+  },
+  {
+    id: 3,
+    userName: "Michael Davis",
+    phoneNumber: "+1-555-9012",
+    totalPeople: 6,
+    tableBookingTime: "2025-06-04T18:00:00Z",
+    restaurantId: 3,
+    status: "confirmed",
+    specialRequests: "Birthday celebration",
+    createdAt: "2025-06-01T16:45:00Z"
+  }
+];
+
 // GET all restaurants
 app.get('/api/restaurants', (req, res) => {
   try {
@@ -193,6 +230,151 @@ app.get('/api/restaurants/city/:city', (req, res) => {
   }
 });
 
+// GET all bookings
+app.get('/api/bookings', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      count: bookings.length,
+      data: bookings
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+});
+
+// GET single booking by ID
+app.get('/api/bookings/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const booking = bookings.find(b => b.id === id);
+    
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: booking
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+});
+
+// GET bookings by restaurant ID
+app.get('/api/bookings/restaurant/:restaurantId', (req, res) => {
+  try {
+    const restaurantId = parseInt(req.params.restaurantId);
+    const restaurantBookings = bookings.filter(b => b.restaurantId === restaurantId);
+    
+    res.json({
+      success: true,
+      count: restaurantBookings.length,
+      data: restaurantBookings
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+});
+
+// POST create new booking
+app.post('/api/bookings', (req, res) => {
+  try {
+    const { userName, phoneNumber, totalPeople, tableBookingTime, restaurantId, specialRequests } = req.body;
+    
+    // Validation
+    if (!userName || !phoneNumber || !totalPeople || !tableBookingTime || !restaurantId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: userName, phoneNumber, totalPeople, tableBookingTime, restaurantId'
+      });
+    }
+    
+    // Check if restaurant exists
+    const restaurant = restaurants.find(r => r.id === parseInt(restaurantId));
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: 'Restaurant not found'
+      });
+    }
+    
+    // Create new booking
+    const newBooking = {
+      id: bookings.length + 1,
+      userName,
+      phoneNumber,
+      totalPeople: parseInt(totalPeople),
+      tableBookingTime,
+      restaurantId: parseInt(restaurantId),
+      status: "pending",
+      specialRequests: specialRequests || "",
+      createdAt: new Date().toISOString()
+    };
+    
+    bookings.push(newBooking);
+    
+    res.status(201).json({
+      success: true,
+      message: 'Booking created successfully',
+      data: newBooking
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+});
+
+// GET booking with restaurant details
+app.get('/api/bookings/:id/details', (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const booking = bookings.find(b => b.id === id);
+    
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found'
+      });
+    }
+    
+    const restaurant = restaurants.find(r => r.id === booking.restaurantId);
+    
+    res.json({
+      success: true,
+      data: {
+        ...booking,
+        restaurant: restaurant
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
@@ -201,7 +383,12 @@ app.get('/', (req, res) => {
       'GET /api/restaurants': 'Get all restaurants',
       'GET /api/restaurants/:id': 'Get restaurant by ID',
       'GET /api/restaurants/cuisine/:cuisine': 'Get restaurants by cuisine',
-      'GET /api/restaurants/city/:city': 'Get restaurants by city'
+      'GET /api/restaurants/city/:city': 'Get restaurants by city',
+      'GET /api/bookings': 'Get all bookings',
+      'GET /api/bookings/:id': 'Get booking by ID',
+      'GET /api/bookings/:id/details': 'Get booking with restaurant details',
+      'GET /api/bookings/restaurant/:restaurantId': 'Get bookings by restaurant',
+      'POST /api/bookings': 'Create new booking'
     }
   });
 });
