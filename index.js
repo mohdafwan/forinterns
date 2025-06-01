@@ -91,7 +91,7 @@ const restaurants = [
     },
     cuisine: ["American", "Seafood", "Breakfast"],
     phone: "+1-555-0789",
-    email: "hello@oceanbreeze.com",
+    email: "girishkor5@gmail.com",
     amenities: ["Ocean View", "Pet Friendly", "Free WiFi", "Brunch", "Fresh Seafood"],
     location: {
       address: "789 Coastal Highway",
