@@ -29,7 +29,7 @@ const restaurants = [
     },
     cuisine: ["Italian", "Mediterranean"],
     phone: "+1-555-0123",
-    email: "info@goldenspoon.com",
+    email: "mayurranshinge08@gmail.com",
     amenities: ["Free WiFi", "Outdoor Seating", "Parking Available", "Delivery", "Takeout"],
     location: {
       address: "123 Main Street, Downtown",
